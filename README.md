@@ -7,4 +7,7 @@ Generator of IoT Traffic with GUI
 - Приложений: CodeLite IDE (ранние версии Eclipse IDE), wxFormBuilder; 
 - Библиотек: STL, Berkley Sockets, wxWidgets.
 ПО было разработано для Linux-подобных операционных систем.
+
 Внешний вид (GUI) ПО отображен в файле iotGenerator.png.
+
+Файл projectStructure.png отображает структуру проекта в приложении CodeLite IDE.
