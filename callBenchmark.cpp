@@ -1,6 +1,7 @@
 //#include "library.hpp"
 #include "callBenchmark.h"
 
+//Define constructor and destructor
 callBenchmark::callBenchmark(int32_t _quantityOfThreads, int64_t _quantityOfPackage, int16_t _scenarioType,int16_t _trafficType, int16_t _dataFieldSize, uint64_t _baseDelay, uint64_t _antipersistantDelay, uint64_t _sendDuration, int8_t _IPType, std::string _netAdr, std::string _dstAdr, std::string _mask) : quantityOfThreads(_quantityOfThreads), quantityOfPackage(_quantityOfPackage), scenarioType(_scenarioType), trafficType(_trafficType), dataFieldSize(_dataFieldSize), baseDelay(_baseDelay), antipersistantDelay(_antipersistantDelay), sendDuration(_sendDuration), IPType(_IPType), netAdr(_netAdr), dstAdr(_dstAdr), mask(_mask) {
 	this->controlFlag = 0;
 }
@@ -9,38 +10,47 @@ callBenchmark::~callBenchmark() {
 	delete controlFunction;
 }
 
+
+//Define controlIoTThread object
 void callBenchmark::initFunction(void) {
+	//Define pseudorandom generator
 	srand((unsigned)time(NULL));
-	fprintf(stderr, "err\n");
+	
+	//Define new controlIoTThreads object
 	this->controlFunction = new controlIoTThreads(this->quantityOfThreads, this->quantityOfPackage, this->dataFieldSize, this->scenarioType, this->trafficType, this->baseDelay, this->sendDuration, this->antipersistantDelay, this->IPType, formAdrArray(this->IPType, this->netAdr), formAdrArray(this->IPType, this->dstAdr), formAdrArray(this->IPType, this->mask));
+	
+	//Create new Thread, send some parameters and detach this thread 
 	std::thread monitoringControlThread = std::thread(&callBenchmark::stopControlThread, this, &this->controlFunction, &this->controlFlag);
 	monitoringControlThread.detach();
 	
+	//start controlIoTThreads threads
 	this->controlFunction->startThreads();
 }
 
+//Define value for controlIoTThread label
 void callBenchmark::setControlFlagCycle(bool value){
 	this->controlFlag = value;
 }
 
+//Threads is working until controlFlag is not true
 void callBenchmark::stopControlThread(controlIoTThreads** _controlFunction, bool* _controlFlag){
-	//fprintf(stdout, "%d\n", (*_controlFunction)->quantityOfThreads);
 	while(*_controlFlag != true) {}
-	(*_controlFunction)->switchOffThreads();
+	(*_controlFunction)->switchOffThreads(); //If controlFlag == true stop all threads
 }
 
+//Transform address from std::string to Uint8 Array
 uint8_t* callBenchmark::formAdrArray(int8_t _IPType, std::string transformAdr) {
 	int adrSize = NULL;
 	if(_IPType = 6) 
 		adrSize = 16;
 	else adrSize = 4;
 	
-	uint8_t* retAdrArray = new uint8_t[adrSize];
-	
+	// Define Uint8 Array
+	uint8_t* retAdrArray = new uint8_t[adrSize]; 
 	for(int ix = 0; ix < adrSize; ++ix)
 		retAdrArray[ix] = 0x00;
 	
-	std::size_t lastFound = transformAdr.find(".");
+	std::size_t lastFound = transformAdr.find("."); //Find the first '.'
 	if (lastFound != std::string::npos) {
 		retAdrArray[0] = (uint8_t)std::stoi(transformAdr.substr(0, lastFound));
 		
